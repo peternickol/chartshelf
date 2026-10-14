@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ChartShelf</title>
+  <link rel="icon" href="../docs/logo.png">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f3f5f8;
+      --card: #ffffff;
+      --ink: #172033;
+      --muted: #5c6b80;
+      --line: #e5e9f0;
+      --accent: #3d6bf5;
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #0e131b;
+      --card: #171d27;
+      --ink: #e8edf5;
+      --muted: #9aa6b8;
+      --line: #2a3342;
+      --accent: #8eabff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 36px 20px 72px; }
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: flex-end;
+      margin-bottom: 8px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 40px;
+      letter-spacing: -0.045em;
+      line-height: 1;
+    }
+    h2 {
+      margin: 8px 0 0;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .brand { display: flex; gap: 14px; align-items: center; min-width: 0; }
+    .brand img { width: 56px; height: 56px; border-radius: 14px; }
+    .lede { margin: 8px 0 0; max-width: 62ch; color: var(--muted); font-size: 16px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; flex: none; }
+    button {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 999px;
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+    button:hover { border-color: var(--accent); }
+    button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .stack { display: flex; flex-direction: column; gap: 16px; margin-top: 22px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      min-width: 0;
+    }
+    .card.wide { grid-column: 1 / -1; }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      padding-right: 8px;
+    }
+    .note {
+      margin: 0;
+      padding: 14px 16px 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .card-top .note { flex: 1; min-width: 0; }
+    .card-top .actions { padding-top: 10px; }
+    .picked {
+      min-height: 1.2em;
+      margin: 0;
+      padding: 0 14px 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .overview { border-top: 1px solid var(--line); }
+    .sparks {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      padding: 8px 12px 14px;
+    }
+    figure { margin: 0; min-width: 0; }
+    figcaption { color: var(--muted); font-size: 12px; padding: 0 4px; }
+    .boot {
+      margin: 16px 0 0;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card);
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    pre {
+      margin: 0;
+      padding: 16px 18px;
+      max-width: 100%;
+      overflow: auto;
+      border-radius: 16px;
+      background: #151922;
+      color: #e8edf5;
+      font-size: 13px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    html[data-theme="dark"] pre { background: #0b0e14; border: 1px solid var(--line); }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.92em; }
+    .foot { margin: 0; color: var(--muted); font-size: 13px; }
+    @media (max-width: 800px) {
+      h1 { font-size: 32px; }
+      header, .card-top { flex-direction: column; align-items: flex-start; }
+      .grid, .sparks { grid-template-columns: 1fr; }
+      .card-top .actions { padding-top: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <img src="../docs/logo.png" alt="">
+        <div>
+          <h1>ChartShelf</h1>
+          <p class="lede">Live charts for the library: time series, zoom, two axes, mixed marks, and the other constructors. Serve this folder and open <code>/demo/index.html</code>.</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" id="theme">Dark</button>
+      </div>
+    </header>
+    <p id="boot" class="boot">Loading the charts…</p>
+    <noscript><p class="boot">The charts need JavaScript. Serve this repository and open /demo/index.html.</p></noscript>
+
+    <div class="stack">
+      <h2>Over time</h2>
+      <section class="card wide">
+        <div class="card-top">
+          <p class="note">Stacked area. The legend hides a series.</p>
+          <div class="actions">
+            <button type="button" id="scramble">Scramble</button>
+            <button type="button" id="add-month">Add month</button>
+          </div>
+        </div>
+        <div id="users"></div>
+      </section>
+
+      <section class="card wide">
+        <p class="note">Drag, scroll, or the toolbar to zoom. Double-click resets. Drag the lower chart to move the window.</p>
+        <div id="timeline"></div>
+        <div id="overview" class="overview"></div>
+      </section>
+
+      <div class="grid">
+        <section class="card">
+          <p class="note">Two value axes. The signal series is dashed.</p>
+          <div id="sensor"></div>
+        </section>
+        <section class="card">
+          <p class="note">A missing sample leaves a gap. The mark at 70 is an annotation.</p>
+          <div id="latency"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="stack">
+      <h2>Compare</h2>
+      <div class="grid">
+        <section class="card">
+          <p class="note">Stacked columns.</p>
+          <div id="revenue"></div>
+        </section>
+        <section class="card">
+          <p class="note">The same kind of columns, scaled so each group is 100%.</p>
+          <div id="split"></div>
+        </section>
+        <section class="card wide">
+          <p class="note">Columns and a line, each on its own axis.</p>
+          <div id="shelf-combo"></div>
+        </section>
+        <section class="card">
+          <p class="note">Horizontal bars. Click a bar.</p>
+          <div id="paths"></div>
+          <p class="picked" id="picked">Click a bar.</p>
+        </section>
+        <section class="card">
+          <p class="note">Scatter of payload against latency.</p>
+          <div id="trials"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="stack">
+      <h2>Shapes</h2>
+      <div class="grid">
+        <section class="card">
+          <div class="card-top">
+            <p class="note">Constructed with <code>new Line</code>. Update series replaces the values.</p>
+            <div class="actions">
+              <button type="button" id="shelf-update">Update series</button>
+            </div>
+          </div>
+          <div id="shelf-line"></div>
+        </section>
+        <section class="card">
+          <p class="note">Donut. The center is the total.</p>
+          <div id="share"></div>
+        </section>
+        <section class="card">
+          <p class="note">Constructed with <code>new Donut</code>.</p>
+          <div id="shelf-donut"></div>
+        </section>
+        <section class="card">
+          <p class="note">Radar, one spoke per category.</p>
+          <div id="radar"></div>
+        </section>
+        <section class="card">
+          <p class="note">Radial bars. The center shows the first value.</p>
+          <div id="gauge"></div>
+        </section>
+        <section class="card">
+          <p class="note">Polar area.</p>
+          <div id="polar"></div>
+        </section>
+        <section class="card wide">
+          <p class="note">Heatmap. Color follows the count.</p>
+          <div id="heat"></div>
+        </section>
+        <section class="card">
+          <p class="note">Each candle is the open, high, low, and close.</p>
+          <div id="candles"></div>
+        </section>
+        <section class="card">
+          <p class="note">Treemap. Tile area is the weight.</p>
+          <div id="tree"></div>
+        </section>
+        <section class="card wide">
+          <p class="note">The band runs from the low to the high.</p>
+          <div id="band"></div>
+        </section>
+        <section class="card wide">
+          <p class="note">Sparklines hide the axes, the grid, and the legend.</p>
+          <div class="sparks">
+            <figure>
+              <div id="spark-signups"></div>
+              <figcaption>Signups</figcaption>
+            </figure>
+            <figure>
+              <div id="spark-errors"></div>
+              <figcaption>Errors</figcaption>
+            </figure>
+            <figure>
+              <div id="spark-latency"></div>
+              <figcaption>Latency</figcaption>
+            </figure>
+          </div>
+        </section>
+      </div>
+
+      <pre><code>import { area, line } from 'chartshelf';
+
+// points are [timestamp, value], one hour apart
+line('#timeline', {
+  id: 'traffic',
+  title: 'Requests',
+  zoom: true,
+  markers: false,
+  series: [{ name: 'Requests', data: points }],
+  x: { format: 'HH:mm' },
+  y: { zero: false },
+});
+
+area('#overview', {
+  height: 132,
+  legend: false,
+  brush: { target: 'traffic' },
+  series: [{ name: 'Requests', data: points }],
+});</code></pre>
+      <p class="foot">From this repository: <code>npm run demo</code>, then open <code>/demo/index.html</code>.</p>
+    </div>
+  </div>
+
+  <script>
+    setTimeout(function () {
+      var boot = document.getElementById('boot');
+      if (!boot) return;
+      if (document.querySelector('#users svg')) {
+        boot.remove();
+        return;
+      }
+      boot.textContent = 'The charts did not start. Serve this repository and open /demo/index.html. Opening the file from disk blocks the library import.';
+    }, 1500);
+  </script>
+  <script type="module">
+    import ChartShelf, {
+      Donut,
+      Line,
+      area,
+      bar,
+      candlestick,
+      column,
+      donut,
+      heatmap,
+      line,
+      polarArea,
+      radar,
+      radialBar,
+      rangeArea,
+      scatter,
+      treemap,
+    } from '../src/index.js';
+
+    document.querySelector('#boot')?.remove();
+
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    let theme = systemDark ? 'dark' : 'light';
+    document.documentElement.dataset.theme = theme;
+    document.querySelector('#theme').textContent = theme === 'dark' ? 'Light' : 'Dark';
+
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
+    const names = ['Sep', 'Oct', 'Nov', 'Dec'];
+    const users = {
+      New: [42, 58, 51, 72, 69, 90, 110, 104],
+      Returning: [80, 86, 92, 98, 120, 128, 140, 156],
+    };
+    const end = new Date(2026, 9, 8, 18, 0).getTime();
+    const hour = 60 * 60 * 1000;
+    const requests = Array.from({ length: 36 }, (_, index) => {
+      const time = end - (35 - index) * hour;
+      const clock = new Date(time).getHours();
+      const wave = 42 + Math.round(16 * Math.sin(index / 3.1) + 9 * Math.sin(index / 1.4));
+      const day = clock >= 8 && clock <= 18 ? 28 : 0;
+      return [time, wave + day];
+    });
+
+    const charts = [];
+    const mount = (chart) => {
+      charts.push(chart);
+      return chart;
+    };
+
+    const hero = mount(area('#users', {
+      theme,
+      height: 360,
+      title: 'Active users',
+      subtitle: 'Last eight months',
+      categories: months.slice(),
+      series: { New: users.New.slice(), Returning: users.Returning.slice() },
+      stacked: true,
+      curve: 'smooth',
+      y: { title: 'Users' },
+    }));
+
+    mount(line('#timeline', {
+      theme,
+      id: 'traffic',
+      height: 360,
+      title: 'Requests',
+      subtitle: 'One hour per sample',
+      zoom: true,
+      markers: false,
+      series: [{ name: 'Requests', data: requests }],
+      x: { format: 'HH:mm' },
+      y: { title: 'Requests', zero: false },
+    }));
+
+    mount(area('#overview', {
+      theme,
+      height: 132,
+      legend: false,
+      markers: false,
+      brush: { target: 'traffic' },
+      series: [{ name: 'Requests', data: requests }],
+      x: { format: 'HH:mm' },
+    }));
+
+    mount(line('#sensor', {
+      theme,
+      height: 320,
+      title: 'Room sensor',
+      subtitle: 'Temperature and signal',
+      markers: false,
+      series: [
+        { name: 'Temperature', strokeWidth: 2.25, data: Array.from({ length: 18 }, (_, index) => {
+          const time = end - (17 - index) * hour;
+          const clock = new Date(time).getHours();
+          const value = 69 + 4 * Math.sin(((clock - 6) / 12) * Math.PI);
+          return [time, Math.round(value * 10) / 10];
+        }) },
+        { name: 'Signal', yIndex: 1, strokeWidth: 1.75, dash: 5, data: Array.from({ length: 18 }, (_, index) => {
+          const time = end - (17 - index) * hour;
+          return [time, -62 - Math.round(8 * Math.sin(index / 2.5) + index * 0.4)];
+        }) },
+      ],
+      yAxes: [
+        { title: '°F', min: 60, max: 82, refit: false },
+        { opposite: true, title: 'dBm', min: -130, max: -30, refit: false },
+      ],
+      x: { format: 'HH:mm' },
+    }));
+
+    mount(line('#latency', {
+      theme,
+      height: 320,
+      title: 'API latency',
+      subtitle: 'p95, milliseconds',
+      categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      series: {
+        Gateway: [82, 96, null, 118, 101, 90, 86],
+        Edge: [41, 44, 48, 46, 42, 39, 40],
+      },
+      markers: true,
+      y: { title: 'ms' },
+      annotations: { yaxis: [{ y: 70, borderColor: '#e2547a', label: { text: 'Limit' } }] },
+    }));
+
+    mount(bar('#revenue', {
+      theme,
+      height: 320,
+      title: 'Revenue',
+      subtitle: 'USD thousands',
+      stacked: true,
+      categories: ['Q1', 'Q2', 'Q3', 'Q4'],
+      series: { Product: [120, 148, 132, 176], Services: [42, 55, 61, 74] },
+      y: { format: (value) => (value === 0 ? '$0' : `$${value}k`) },
+    }));
+
+    mount(column('#split', {
+      theme,
+      height: 320,
+      title: 'Channel mix',
+      subtitle: 'Share of visits',
+      stacked: true,
+      stackType: '100%',
+      categories: ['Q1', 'Q2', 'Q3', 'Q4'],
+      series: {
+        Direct: [50, 46, 42, 40],
+        Search: [30, 32, 34, 33],
+        Social: [20, 22, 24, 27],
+      },
+    }));
+
+    mount(bar('#paths', {
+      theme,
+      height: 320,
+      title: 'Top paths',
+      horizontal: true,
+      showValues: true,
+      name: 'Views',
+      series: {
+        '/docs': 820,
+        '/pricing': 640,
+        '/blog': 510,
+        '/login': 430,
+        '/changelog': 220,
+      },
+      onPoint(event) {
+        const point = event.points[0];
+        document.querySelector('#picked').textContent = point
+          ? `${event.label} · ${point.value.toLocaleString()} views`
+          : event.label;
+      },
+    }));
+
+    mount(donut('#share', {
+      theme,
+      height: 320,
+      title: 'Traffic',
+      series: { Direct: 42, Search: 28, Social: 16, Email: 9, Other: 5 },
+      center: { label: 'Visits', value: (total) => String(total) },
+    }));
+
+    mount(scatter('#trials', {
+      theme,
+      height: 320,
+      title: 'Payload and latency',
+      series: {
+        Cache: [[2, 18], [8, 24], [14, 29], [22, 34], [30, 41], [46, 58]],
+        Origin: [[4, 90], [12, 130], [18, 124], [28, 168], [36, 190], [52, 240]],
+      },
+      x: { title: 'Payload KB' },
+      y: { title: 'Latency ms' },
+    }));
+
+    const revenue = [30, 40, 35, 50, 49, 60, 70, 64];
+    const shelfLine = mount(new Line(document.querySelector('#shelf-line'), {
+      theme,
+      height: 320,
+      title: 'Monthly revenue',
+      subtitle: 'USD',
+      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+      series: { Revenue: revenue.slice() },
+      y: { title: 'Revenue', format: (value) => `$${Math.round(value)}` },
+      curve: 'smooth',
+      strokeWidth: 3,
+      markers: false,
+    }).render());
+
+    mount(new Donut(document.querySelector('#shelf-donut'), {
+      theme,
+      height: 320,
+      title: 'Fruit share',
+      series: [44, 55, 13, 43, 22],
+      labels: ['Apple', 'Mango', 'Orange', 'Watermelon', 'Grape'],
+      inner: 0.65,
+      legend: { position: 'bottom' },
+    }).render());
+
+    mount(new ChartShelf(document.querySelector('#shelf-combo'), {
+      theme,
+      height: 320,
+      title: 'Orders and margin',
+      subtitle: 'Column and line',
+      categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      series: [
+        { name: 'Orders', type: 'column', data: [44, 55, 41, 67, 22, 43] },
+        { name: 'Margin', type: 'line', data: [12, 18, 14, 22, 10, 16], yIndex: 1, strokeWidth: 3 },
+      ],
+      yAxes: [
+        { title: 'Orders' },
+        { opposite: true, title: 'Margin' },
+      ],
+      legend: { position: 'top' },
+    }).render());
+
+    mount(radar('#radar', {
+      theme,
+      height: 340,
+      title: 'Site score',
+      categories: ['Latency', 'Loss', 'Jitter', 'Signal', 'Uptime'],
+      series: [
+        { name: 'East', data: [80, 50, 60, 70, 90] },
+        { name: 'West', data: [62, 74, 55, 84, 70] },
+      ],
+    }));
+
+    mount(radialBar('#gauge', {
+      theme,
+      height: 320,
+      title: 'Capacity',
+      series: [72, 54, 31],
+      labels: ['CPU', 'Memory', 'Disk'],
+      inner: 0.55,
+    }));
+
+    mount(polarArea('#polar', {
+      theme,
+      height: 320,
+      title: 'Spend',
+      series: [44, 28, 18, 12],
+      labels: ['Build', 'Run', 'Support', 'Other'],
+    }));
+
+    mount(heatmap('#heat', {
+      theme,
+      height: 340,
+      title: 'Requests by hour',
+      legend: false,
+      categories: ['00', '04', '08', '12', '16', '20'],
+      series: [
+        { name: 'Mon', data: [12, 18, 40, 64, 58, 22] },
+        { name: 'Tue', data: [10, 16, 44, 70, 60, 24] },
+        { name: 'Wed', data: [14, 20, 48, 76, 66, 28] },
+        { name: 'Thu', data: [11, 19, 42, 72, 63, 26] },
+        { name: 'Fri', data: [16, 24, 50, 80, 70, 36] },
+      ],
+    }));
+
+    mount(candlestick('#candles', {
+      theme,
+      height: 320,
+      title: 'Session',
+      x: { type: 'category' },
+      series: [{
+        name: 'Price',
+        data: [
+          [101, 108, 99, 106],
+          [106, 110, 104, 105],
+          [105, 107, 98, 100],
+          [100, 112, 99, 111],
+          [111, 116, 108, 114],
+          [114, 115, 106, 108],
+          [108, 118, 107, 117],
+          [117, 121, 113, 114],
+          [114, 119, 110, 118],
+          [118, 124, 116, 122],
+        ].map((y, index) => ({ x: `Oct ${index + 1}`, y })),
+      }],
+    }));
+
+    mount(treemap('#tree', {
+      theme,
+      height: 320,
+      title: 'Page weight',
+      series: [{
+        data: [
+          { x: 'Docs', y: 40 },
+          { x: 'App', y: 32 },
+          { x: 'Marketing', y: 22 },
+          { x: 'Blog', y: 16 },
+          { x: 'Status', y: 12 },
+          { x: 'Login', y: 9 },
+          { x: 'API', y: 7 },
+        ],
+      }],
+    }));
+
+    mount(rangeArea('#band', {
+      theme,
+      height: 320,
+      title: 'Daily range',
+      subtitle: 'Low and high',
+      series: [{
+        name: 'Temperature',
+        data: [
+          { x: 'Mon', y: [12, 20] },
+          { x: 'Tue', y: [14, 22] },
+          { x: 'Wed', y: [11, 19] },
+          { x: 'Thu', y: [15, 26] },
+          { x: 'Fri', y: [16, 24] },
+          { x: 'Sat', y: [13, 21] },
+          { x: 'Sun', y: [12, 18] },
+        ],
+      }],
+    }));
+
+    const spark = (id, data) => mount(area(id, {
+      theme,
+      height: 84,
+      sparkline: true,
+      curve: 'smooth',
+      series: [{ data }],
+    }));
+    spark('#spark-signups', [12, 14, 13, 18, 22, 21, 28, 26, 32, 30]);
+    spark('#spark-errors', [4, 6, 5, 9, 7, 8, 6, 5, 4, 3]);
+    spark('#spark-latency', [80, 76, 82, 70, 68, 72, 64, 66, 60, 58]);
+
+    function paintTheme() {
+      document.documentElement.dataset.theme = theme;
+      document.querySelector('#theme').textContent = theme === 'dark' ? 'Light' : 'Dark';
+      for (const item of charts) item.update({ theme }, false);
+    }
+
+    document.querySelector('#shelf-update').addEventListener('click', () => {
+      for (let index = 0; index < revenue.length; index += 1) {
+        revenue[index] = Math.max(8, Math.round(revenue[index] * (0.75 + Math.random() * 0.5)));
+      }
+      shelfLine.updateSeries({ Revenue: revenue.slice() });
+    });
+
+    document.querySelector('#theme').addEventListener('click', () => {
+      theme = theme === 'dark' ? 'light' : 'dark';
+      paintTheme();
+    });
+
+    document.querySelector('#scramble').addEventListener('click', () => {
+      for (const key of Object.keys(users)) {
+        users[key] = users[key].map((value) => Math.max(8, Math.round(value * (0.72 + Math.random() * 0.56))));
+      }
+      hero.update({
+        categories: months.slice(),
+        series: { New: users.New.slice(), Returning: users.Returning.slice() },
+      });
+    });
+
+    document.querySelector('#add-month').addEventListener('click', () => {
+      const label = names[months.length % names.length] + (months.length > 11 ? ' ' + months.length : '');
+      months.push(label);
+      for (const key of Object.keys(users)) {
+        const last = users[key][users[key].length - 1];
+        users[key].push(Math.max(8, Math.round(last * (0.9 + Math.random() * 0.25))));
+      }
+      if (months.length > 12) {
+        months.shift();
+        for (const key of Object.keys(users)) users[key].shift();
+      }
+      hero.update({
+        categories: months.slice(),
+        series: { New: users.New.slice(), Returning: users.Returning.slice() },
+        subtitle: `${months.length} months`,
+      });
+    });
+  </script>
+</body>
+</html>

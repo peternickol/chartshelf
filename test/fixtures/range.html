@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>ChartShelf range</title>
+  <style>
+    body { margin: 0; font: 14px sans-serif; background: #fff; }
+    #sensor, #main, #brush, #gauge { width: min(880px, 100%); margin: 12px auto; }
+  </style>
+</head>
+<body>
+  <div id="sensor"></div>
+  <div id="main"></div>
+  <div id="brush"></div>
+  <div id="gauge"></div>
+  <script type="module">
+    import { Area, Line, RadialBar } from '../../src/index.js';
+
+    const start = Date.UTC(2026, 9, 7, 0, 0, 0);
+    const points = Array.from({ length: 24 }, (_, index) => [start + index * 3600000, index + 1]);
+
+    new Line('#sensor', {
+      height: 220,
+      animate: false,
+      markers: false,
+      series: [
+        { name: 'Temperature', data: points.map(([x, y]) => [x, 30 + y / 10]) },
+        { name: 'RSSI', yIndex: 1, dash: 5, strokeWidth: 1.75, data: points.map(([x, y]) => [x, -40 - y]) },
+      ],
+      yAxes: [
+        { title: '°F', format: (value) => `${value.toFixed(1)}` },
+        { opposite: true, title: 'dBm', min: -130, max: -30 },
+      ],
+      x: { utc: true },
+    }).render();
+
+    new Line('#main', {
+      id: 'trend',
+      height: 280,
+      zoom: true,
+      animate: false,
+      series: [{ name: 'Load', data: points }],
+      x: { format: 'HH:mm', utc: true },
+      y: { min: 0 },
+    }).render();
+
+    new Area('#brush', {
+      id: 'overview',
+      height: 120,
+      animate: false,
+      legend: false,
+      brush: { target: 'trend', min: start + 8 * 3600000, max: start + 16 * 3600000 },
+      series: [{ name: 'Window', data: points }],
+      x: { utc: true },
+      y: { min: 0, max: 30 },
+    }).render();
+
+    new RadialBar('#gauge', {
+      height: 240,
+      animate: false,
+      series: [46],
+      labels: ['Queued payloads'],
+      center: '12',
+      inner: 0.63,
+      start: -135,
+      end: 135,
+    }).render();
+  </script>
+</body>
+</html>
