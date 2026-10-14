@@ -10,6 +10,8 @@
 </p>
 
 <p align="center">
+  <a href="https://peternickol.github.io/chartshelf/">Live demo</a>
+  &nbsp;·&nbsp;
   <a href="#gallery">Gallery</a>
   &nbsp;·&nbsp;
   <a href="#install">Install</a>
@@ -57,7 +59,7 @@ Pass a plain options object to a constructor, or call the matching helper. Types
   <img src="docs/images/scatter.png" alt="Scatter plot of payload and latency" width="412">
 </p>
 
-The same options cover pie, column, box plot, range bar, range area, polar area, and sparklines. The gallery in [`demo/index.html`](demo/index.html) draws them all.
+The same options cover pie, column, box plot, range bar, range area, polar area, and sparklines. The [live gallery](https://peternickol.github.io/chartshelf/) draws them all.
 
 ## Install
 
@@ -86,11 +88,13 @@ A page can import the module directly. Serve the page over HTTP. Module imports 
 </script>
 ```
 
+The gallery is also in this repository at [`demo/index.html`](demo/index.html).
+
 ```bash
 npm run demo
 ```
 
-Then open `/demo/index.html`.
+Then open `http://127.0.0.1:4173/demo/`.
 
 ## Quick start
 

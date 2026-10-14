@@ -4,6 +4,11 @@
   "description": "MIT-licensed, dependency-free charts for the web.",
   "type": "module",
   "license": "MIT",
+  "homepage": "https://peternickol.github.io/chartshelf/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peternickol/chartshelf.git"
+  },
   "main": "./src/index.js",
   "module": "./src/index.js",
   "types": "./chartshelf.d.ts",
